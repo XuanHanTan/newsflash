@@ -15,11 +15,7 @@ class SetInterestsEvent extends NewsEvent {
   SetInterestsEvent({required this.interests});
 }
 
-class FetchNewsEvent extends NewsEvent {
-  final DateTime time;
-
-  FetchNewsEvent({required this.time});
-}
+class FetchNewsEvent extends NewsEvent {}
 
 class SkipNewsEvent extends NewsEvent {
   final String id;
