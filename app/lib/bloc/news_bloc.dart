@@ -18,12 +18,14 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
 
   void onSetNewsSettings(SetNewsSettings event, Emitter emit) {
     emit(state.copyWith(
-        settings: state.settings.copyWith(isGlobal: event.isGlobal, time: event.time)));
+        settings: state.settings
+            .copyWith(isGlobal: event.isGlobal, time: event.time)));
   }
 
   Future<void> onFetchInterests(FetchInterestsEvent event, Emitter emit) async {
+    emit(state.copyWith(isLoading: true));
     final interests = await InterestsApi.getInterests();
-    emit(state.copyWith(interests: interests));
+    emit(state.copyWith(interests: interests, isLoading: false));
   }
 
   Future<void> onSetInterests(SetInterestsEvent event, Emitter emit) async {
@@ -32,12 +34,13 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   }
 
   Future<void> onFetchNews(FetchNewsEvent event, Emitter emit) async {
+    emit(state.copyWith(isLoading: true));
     final countryCode = (await CountryIp.find())?.countryCode;
     final news = await NewsSummary.fetchNews(
         interests: state.interests,
         time: state.settings.time,
         region: countryCode);
-    emit(state.copyWith(recommendations: news));
+    emit(state.copyWith(recommendations: news, isLoading: false));
   }
 
   void onSkipNews(SkipNewsEvent event, Emitter emit) async {

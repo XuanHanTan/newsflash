@@ -2,7 +2,7 @@ import 'package:app/api/news_api.dart';
 
 class NewsState {
   final bool isLoading;
-  final List<String> interests;
+  final Set<String> interests;
   final List<NewsSummary> recommendations;
   final Map<String, bool> skipped;
   final NewsSettings settings;
@@ -20,7 +20,7 @@ class NewsState {
   factory NewsState.initial() {
     return NewsState(
       isLoading: true,
-      interests: [],
+      interests: {},
       recommendations: [],
       skipped: {},
       settings: NewsSettings(isGlobal: true, time: DateTime.now()),
@@ -30,7 +30,7 @@ class NewsState {
 
   NewsState copyWith({
     bool? isLoading,
-    List<String>? interests,
+    Set<String>? interests,
     List<NewsSummary>? recommendations,
     Map<String, bool>? skipped,
     NewsSettings? settings,

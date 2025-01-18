@@ -38,7 +38,7 @@ class NewsSummary extends News {
   }
 
   static Future<List<NewsSummary>> fetchNews(
-      {required List<String> interests,
+      {required Set<String> interests,
       required DateTime time,
       required String? region}) async {
     var url =
