@@ -7,7 +7,7 @@ abstract class News {
   final String cover;
   final DateTime time;
 
-  static const URL = 'http://127.0.0.1:5000/news';
+  static const url = 'http://127.0.0.1:5000/news';
 
   News(
       {required this.id,
@@ -38,7 +38,7 @@ class NewsSummary extends News {
 
   static Future<List<NewsSummary>> fetchNews(List<String> interests) async {
     final response = await http
-        .get(Uri.parse('${News.URL}?interests=${interests.join(',')}'));
+        .get(Uri.parse('${News.url}?interests=${interests.join(',')}'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
@@ -51,7 +51,7 @@ class NewsSummary extends News {
   }
 
   Future<NewsDetailed> getDetailedArticle() async {
-    final response = await http.get(Uri.parse('${News.URL}/$id'));
+    final response = await http.get(Uri.parse('${News.url}/$id'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> detailedNews = json.decode(response.body);

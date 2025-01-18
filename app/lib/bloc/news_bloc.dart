@@ -29,6 +29,11 @@ class NewsBloc extends Bloc<NewsEvent, NewsState>{
     emit(state.copyWith(recommendations: news));
   }
 
+  void onSkipNews(SkipNewsEvent event, Emitter emit) async {
+    final newSkippedMap = {...state.skipped, event.id: true};
+    emit(state.copyWith(skipped: newSkippedMap));
+  }
+
   Future<void> onOpenNews(OpenNewsEvent event, Emitter emit) async {
     final newsItem = state.recommendations.firstWhereOrNull((item) => item.id == event.id);
     if (newsItem == null) throw Exception('News item not found');
