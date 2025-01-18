@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
 abstract class News {
   final String id;
   final String title;
   final String cover;
-  final DateTime time;
+  final int readTime;
 
   static const url = 'http://127.0.0.1:5000/news';
 
@@ -14,7 +13,7 @@ abstract class News {
       {required this.id,
       required this.title,
       required this.cover,
-      required this.time});
+      required this.readTime});
 }
 
 class NewsSummary extends News {
@@ -24,13 +23,13 @@ class NewsSummary extends News {
       {required super.id,
       required super.title,
       required super.cover,
-      required super.time,
+      required super.readTime,
       required this.summary});
 
   factory NewsSummary.fromMap(Map<String, dynamic> map) {
     return NewsSummary(
       id: map['id'],
-      time: DateTime.fromMillisecondsSinceEpoch(map['time']),
+      readTime: map['readTime'],
       title: map['title'],
       cover: map['cover'],
       summary: map['summary'],
@@ -38,10 +37,30 @@ class NewsSummary extends News {
   }
 
   static Future<List<NewsSummary>> fetchNews(
-      {required List<String> interests,
+      {required Set<String> interests,
       required DateTime time,
       required String? region}) async {
-    var url =
+    // TODO: test
+    final newsList = [
+      {
+        'id': '1',
+        'title': 'Sample News',
+        'cover': 'https://picsum.photos/200/300',
+        'summary':
+            'This is a sample summary of the news article. It contains some important information about the topic.',
+        'readTime': 5,
+      },
+      {
+        'id': '1',
+        'title': 'Sample News 2',
+        'cover': 'https://picsum.photos/200/300',
+        'summary':
+            'This is a sample summary of the news article. It contains some important information about the topic.',
+        'readTime': 5,
+      }
+    ];
+    return newsList.map((e) => NewsSummary.fromMap(e)).toList();
+    /*var url =
         '${News.url}?interests=${interests.join(',')}&time=${DateFormat("yyyy-MM-dd").format(time)}';
     if (region != null) {
       url += "&region=$region";
@@ -55,7 +74,7 @@ class NewsSummary extends News {
       return newsList.map((e) => NewsSummary.fromMap(e)).toList();
     } else {
       throw Exception('Failed to load news');
-    }
+    }*/
   }
 
   Future<NewsDetailed> getDetailedArticle() async {
@@ -78,14 +97,14 @@ class NewsDetailed extends News {
       {required super.id,
       required super.title,
       required super.cover,
-      required super.time,
+      required super.readTime,
       required this.content,
       required this.sources});
 
   factory NewsDetailed.fromMap(Map<String, dynamic> map) {
     return NewsDetailed(
       id: map['id'],
-      time: DateTime.fromMillisecondsSinceEpoch(map['time']),
+      readTime: map['readTime'],
       title: map['title'],
       cover: map['cover'],
       content: map['content'],

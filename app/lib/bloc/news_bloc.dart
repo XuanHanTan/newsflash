@@ -12,18 +12,21 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     on<FetchInterestsEvent>(onFetchInterests);
     on<SetInterestsEvent>(onSetInterests);
     on<FetchNewsEvent>(onFetchNews);
+    on<SkipNewsEvent>(onSkipNews);
     on<OpenNewsEvent>(onOpenNews);
     on<CloseNewsEvent>(onCloseNews);
   }
 
   void onSetNewsSettings(SetNewsSettings event, Emitter emit) {
     emit(state.copyWith(
-        settings: state.settings.copyWith(isGlobal: event.isGlobal, time: event.time)));
+        settings: state.settings
+            .copyWith(isGlobal: event.isGlobal, time: event.time)));
   }
 
   Future<void> onFetchInterests(FetchInterestsEvent event, Emitter emit) async {
+    emit(state.copyWith(isLoading: true));
     final interests = await InterestsApi.getInterests();
-    emit(state.copyWith(interests: interests));
+    emit(state.copyWith(interests: interests, isLoading: false));
   }
 
   Future<void> onSetInterests(SetInterestsEvent event, Emitter emit) async {
@@ -32,12 +35,15 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   }
 
   Future<void> onFetchNews(FetchNewsEvent event, Emitter emit) async {
-    final countryCode = (await CountryIp.find())?.countryCode;
+    emit(state.copyWith(isLoading: true));
+    final countryCode =
+        state.settings.isGlobal ? null : (await CountryIp.find())?.countryCode;
     final news = await NewsSummary.fetchNews(
-        interests: state.interests,
-        time: state.settings.time,
-        region: countryCode);
-    emit(state.copyWith(recommendations: news));
+      interests: state.interests,
+      time: state.settings.time,
+      region: countryCode,
+    );
+    emit(state.copyWith(news: news, isLoading: false));
   }
 
   void onSkipNews(SkipNewsEvent event, Emitter emit) async {
@@ -46,8 +52,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   }
 
   Future<void> onOpenNews(OpenNewsEvent event, Emitter emit) async {
-    final newsItem =
-        state.recommendations.firstWhereOrNull((item) => item.id == event.id);
+    final newsItem = state.news.firstWhereOrNull((item) => item.id == event.id);
     if (newsItem == null) throw Exception('News item not found');
 
     final detailedNewsItem = await newsItem.getDetailedArticle();

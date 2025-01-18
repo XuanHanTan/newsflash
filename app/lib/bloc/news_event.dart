@@ -1,25 +1,21 @@
 sealed class NewsEvent {}
 
 class SetNewsSettings extends NewsEvent {
-  final bool isGlobal;
-  final DateTime time;
+  final bool? isGlobal;
+  final DateTime? time;
 
-  SetNewsSettings({required this.isGlobal, required this.time});
+  SetNewsSettings({this.isGlobal, this.time});
 }
 
 class FetchInterestsEvent extends NewsEvent {}
 
 class SetInterestsEvent extends NewsEvent {
-  final List<String> interests;
+  final Set<String> interests;
 
   SetInterestsEvent({required this.interests});
 }
 
-class FetchNewsEvent extends NewsEvent {
-  final DateTime time;
-
-  FetchNewsEvent({required this.time});
-}
+class FetchNewsEvent extends NewsEvent {}
 
 class SkipNewsEvent extends NewsEvent {
   final String id;
