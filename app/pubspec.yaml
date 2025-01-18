@@ -39,6 +39,8 @@ dependencies:
   flutter_card_swiper: ^7.0.2
   shared_preferences: ^2.3.5
   collection: ^1.19.0
+  intl: ^0.20.1
+  country_ip: ^3.0.0
 
 dev_dependencies:
   flutter_test:

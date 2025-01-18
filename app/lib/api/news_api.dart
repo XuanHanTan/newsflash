@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 abstract class News {
   final String id;
@@ -36,9 +37,16 @@ class NewsSummary extends News {
     );
   }
 
-  static Future<List<NewsSummary>> fetchNews(List<String> interests) async {
-    final response = await http
-        .get(Uri.parse('${News.url}?interests=${interests.join(',')}'));
+  static Future<List<NewsSummary>> fetchNews(
+      {required List<String> interests,
+      required DateTime time,
+      required String? region}) async {
+    var url =
+        '${News.url}?interests=${interests.join(',')}&time=${DateFormat("yyyy-MM-dd").format(time)}';
+    if (region != null) {
+      url += "&region=$region";
+    }
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);

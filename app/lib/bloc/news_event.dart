@@ -1,5 +1,12 @@
 sealed class NewsEvent {}
 
+class SetNewsSettings extends NewsEvent {
+  final bool isGlobal;
+  final DateTime time;
+
+  SetNewsSettings({required this.isGlobal, required this.time});
+}
+
 class FetchInterestsEvent extends NewsEvent {}
 
 class SetInterestsEvent extends NewsEvent {
@@ -8,7 +15,11 @@ class SetInterestsEvent extends NewsEvent {
   SetInterestsEvent({required this.interests});
 }
 
-class FetchNewsEvent extends NewsEvent {}
+class FetchNewsEvent extends NewsEvent {
+  final DateTime time;
+
+  FetchNewsEvent({required this.time});
+}
 
 class SkipNewsEvent extends NewsEvent {
   final String id;
@@ -18,7 +29,7 @@ class SkipNewsEvent extends NewsEvent {
 
 class OpenNewsEvent extends NewsEvent {
   final String id;
-  
+
   OpenNewsEvent({required this.id});
 }
 
