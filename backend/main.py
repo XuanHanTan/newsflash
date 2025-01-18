@@ -32,13 +32,13 @@ def clean_news_data(raw_data):
             "summary": item.get("summary", "").strip()
         }
         cleaned_parsed_data.append(cleaned_item)
-    return cleaned_parsed_data
+    return cleaned_parsed_data[:5] #image rate limit
 
 #AI image generation
-def img_gen(title):
+def img_gen(title, summary):
     api_key = os.getenv('OPENAI_API_KEY')
     client = OpenAI(api_key=api_key)
-    prompt = f'Based on this news title, create an image thumbnail: {title}'
+    prompt = f'Create an image inspired by a news story about {title}. The story should convey this: {summary} without any text or words involved.'
     response = client.images.generate(
         #model="",
         prompt=prompt,
@@ -59,12 +59,13 @@ def get_news():
     
     news_content = storyGenerator(interests, country, time_frame)
     cleaned_news_content = clean_news_data(news_content)
-
+    
     for item in cleaned_news_content:
-        image_url = img_gen(item["headline"])
+        image_url = img_gen(item["headline"], item["summary"])
         item["image"] = image_url
-
+    
     return jsonify({'news': cleaned_news_content})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
