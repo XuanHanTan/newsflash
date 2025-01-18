@@ -1,0 +1,6 @@
+google-generativeai
+flask
+requests
+pygooglenews
+python-dotenv
+openai
