@@ -2,6 +2,7 @@ import 'package:app/bloc/news_bloc.dart';
 import 'package:app/bloc/news_event.dart';
 import 'package:app/bloc/news_state.dart';
 import 'package:app/main.dart';
+import 'package:app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -81,7 +82,15 @@ class InterestsSetup extends StatelessWidget {
                     ),
                     Spacer(),
                     FilledButton(
-                      onPressed: state.interests.isEmpty ? null : () {},
+                      onPressed: state.interests.isEmpty
+                          ? null
+                          : () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomePage()),
+                              );
+                            },
                       child: Text("Next"),
                     ),
                   ],

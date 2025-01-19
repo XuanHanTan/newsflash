@@ -51,7 +51,7 @@ class NewsSummary extends News {
         'readTime': 5,
       },
       {
-        'id': '1',
+        'id': '2',
         'title': 'Sample News 2',
         'cover': 'https://picsum.photos/200/300',
         'summary':
@@ -78,14 +78,26 @@ class NewsSummary extends News {
   }
 
   Future<NewsDetailed> getDetailedArticle() async {
-    final response = await http.get(Uri.parse('${News.url}/$id'));
+    final detailedNews = {
+      'id': '1',
+      'title': 'Sample News',
+      'cover': 'https://picsum.photos/200/300',
+      'content':
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+      'sources': [],
+      'readTime': 5,
+    };
+    return NewsDetailed.fromMap(detailedNews);
+    
+    // TODO: test
+    /*final response = await http.get(Uri.parse('${News.url}/$id'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> detailedNews = json.decode(response.body);
       return NewsDetailed.fromMap(detailedNews);
     } else {
       throw Exception('Failed to load detailed news');
-    }
+    }*/
   }
 }
 

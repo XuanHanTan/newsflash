@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:app/bloc/news_bloc.dart';
 import 'package:app/bloc/news_event.dart';
+import 'package:app/pages/content_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -75,66 +76,88 @@ class _HomePageState extends State<HomePage> {
                         child: SizedBox(
                           height: screenHeight * 0.6,
                           width: screenWidth * 0.85,
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: Image.network(news.cover,
-                                        fit: BoxFit.cover),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    child: ClipRect(
-                                      child: BackdropFilter(
-                                        filter: ImageFilter.blur(
-                                            sigmaX: 70.0, sigmaY: 70.0),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromARGB(
-                                                    255, 105, 101, 89)
-                                                .withValues(alpha: 0.5),
-                                          ),
-                                          padding: EdgeInsets.all(20),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            spacing: 10,
-                                            children: [
-                                              Text(
-                                                "${news.readTime} MIN READ",
-                                                style: theme
-                                                    .textTheme.labelSmall!
-                                                    .copyWith(
-                                                        color: Colors.white),
-                                              ),
-                                              Text(
-                                                news.title,
-                                                style: theme
-                                                    .textTheme.headlineMedium!
-                                                    .copyWith(
-                                                        color: Colors.white),
-                                              ),
-                                              Text(
-                                                news.summary,
-                                                style: theme
-                                                    .textTheme.bodyMedium!
-                                                    .copyWith(
-                                                        color: Colors.white),
-                                              ),
-                                            ],
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () {
+                              final newsBloc = context.read<NewsBloc>();
+                              newsBloc.add(OpenNewsEvent(id: news.id));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ContentPage()),
+                              );
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: Image.network(
+                                        news.cover,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: ClipRect(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                              sigmaX: 70.0, sigmaY: 70.0),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color.fromARGB(
+                                                      255, 105, 101, 89)
+                                                  .withValues(alpha: 0.5),
+                                            ),
+                                            padding: EdgeInsets.all(20),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              spacing: 10,
+                                              children: [
+                                                Hero(
+                                                  tag: "readtime-${news.id}",
+                                                  child: Text(
+                                                    "${news.readTime} MIN READ",
+                                                    style: theme
+                                                        .textTheme.labelSmall!
+                                                        .copyWith(
+                                                            color:
+                                                                Colors.white),
+                                                  ),
+                                                ),
+                                                Hero(
+                                                  tag: "headline-${news.id}",
+                                                  child: Text(
+                                                    news.title,
+                                                    style: theme.textTheme
+                                                        .headlineMedium!
+                                                        .copyWith(
+                                                            color:
+                                                                Colors.white),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  news.summary,
+                                                  style: theme
+                                                      .textTheme.bodyMedium!
+                                                      .copyWith(
+                                                          color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -170,17 +193,24 @@ class _HomePageState extends State<HomePage> {
                           value: min(7 + time.difference(DateTime.now()).inDays,
                                   7) /
                               7,
-                          onChanged: (daysBefore) {
-                            return context.read<NewsBloc>().add(SetNewsSettings(
-                                  time: DateTime.now().subtract(Duration(
-                                      days: min((daysBefore * 7).toInt() - 7, 0)
-                                          .abs())),
-                                ));
+                          onChanged: (daysBefore) async {
+                            final newsBloc = context.read<NewsBloc>();
+                            final newTime = DateTime.now().subtract(Duration(
+                              days: min((daysBefore * 7).toInt() - 7, 0).abs(),
+                            ));
+
+                            newsBloc.add(SetNewsSettings(
+                              time: newTime,
+                            ));
+                            await newsBloc.stream.firstWhere(
+                                (state) => state.settings.time == newTime);
+                            newsBloc.add(FetchNewsEvent());
                           },
                         ),
                         Text(
                           DateFormat("d MMM yyyy").format(time).toUpperCase(),
-                          style: theme.textTheme.labelLarge!.copyWith(letterSpacing: 1),
+                          style: theme.textTheme.labelLarge!
+                              .copyWith(letterSpacing: 1),
                         ),
                       ],
                     ));
