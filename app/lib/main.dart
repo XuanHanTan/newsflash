@@ -2,6 +2,7 @@ import 'package:app/bloc/news_bloc.dart';
 import 'package:app/bloc/news_event.dart';
 import 'package:app/pages/home_page.dart';
 import 'package:app/pages/region_setup.dart';
+import 'package:app/ui/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,6 +22,8 @@ void main() async {
       create: (context) => newsBloc,
       child: MaterialApp(
         home: firstPage,
+        theme: lightTheme,
+        darkTheme: darkTheme,
       ),
     ),
   );

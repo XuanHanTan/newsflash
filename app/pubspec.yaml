@@ -41,6 +41,7 @@ dependencies:
   collection: ^1.19.0
   intl: ^0.20.1
   country_ip: ^3.0.0
+  flutter_markdown: ^0.7.5
 
 dev_dependencies:
   flutter_test:
@@ -80,7 +81,25 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
+  fonts:
+      - family: Golos Text
+        fonts:
+            - asset: assets/fonts/GolosText-Regular.ttf
+            - asset: assets/fonts/GolosText-Medium.ttf
+              weight: 500
+            - asset: assets/fonts/GolosText-SemiBold.ttf
+              weight: 600
+            - asset: assets/fonts/GolosText-Bold.ttf
+              weight: 700
+      - family: Roboto Serif
+        fonts:
+            - asset: assets/fonts/RobotoSerif-Regular.ttf
+            - asset: assets/fonts/RobotoSerif-Medium.ttf
+              weight: 500
+            - asset: assets/fonts/RobotoSerif-SemiBold.ttf
+              weight: 600
+            - asset: assets/fonts/RobotoSerif-Bold.ttf
+              weight: 700
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

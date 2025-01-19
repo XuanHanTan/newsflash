@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
@@ -52,15 +53,26 @@ class _HomePageState extends State<HomePage> {
               child: BlocBuilder<NewsBloc, NewsState>(
                 buildWhen: (previous, current) =>
                     previous.news != current.news ||
-                    previous.skipped != current.skipped,
+                    previous.skipped != current.skipped ||
+                    previous.isLoading != current.isLoading,
                 builder: (context, state) {
                   final filteredNews = state.news
                       .where((item) => state.skipped[item.id] != true)
                       .toList();
 
+                  if (state.isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
                   if (filteredNews.isEmpty) {
                     return Center(
-                      child: Text("It's looking empty here..."),
+                      child: Text(
+                        "It's looking empty here...",
+                        style: theme.textTheme.bodyMedium!
+                            .copyWith(fontFamily: "Golos Text"),
+                      ),
                     );
                   }
 
@@ -74,8 +86,8 @@ class _HomePageState extends State<HomePage> {
 
                       return Center(
                         child: SizedBox(
-                          height: screenHeight * 0.6,
-                          width: screenWidth * 0.85,
+                          height: screenHeight * 0.7,
+                          width: screenWidth * 0.9,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(20),
                             onTap: () {
@@ -95,8 +107,8 @@ class _HomePageState extends State<HomePage> {
                                 child: Stack(
                                   children: [
                                     Positioned.fill(
-                                      child: Image.network(
-                                        news.cover,
+                                      child: Image.memory(
+                                        base64Decode(news.cover),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -110,8 +122,7 @@ class _HomePageState extends State<HomePage> {
                                               sigmaX: 70.0, sigmaY: 70.0),
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              color: const Color.fromARGB(
-                                                      255, 105, 101, 89)
+                                              color: const Color.fromARGB(255, 134, 125, 97)
                                                   .withValues(alpha: 0.5),
                                             ),
                                             padding: EdgeInsets.all(20),
@@ -168,10 +179,6 @@ class _HomePageState extends State<HomePage> {
                       final news = filteredNews[previousIndex];
                       final newsBloc = context.read<NewsBloc>();
                       newsBloc.add(SkipNewsEvent(id: news.id));
-
-                      if (previousIndex <= state.news.length - 3) {
-                        newsBloc.add(FetchNewsEvent());
-                      }
                       return true;
                     },
                   );
