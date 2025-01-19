@@ -15,12 +15,12 @@ DATA = []
 def generate_uuid():
     return str(uuid.uuid4())
 
-def storyGenerator(interest_field, country, time_frame):
+def storyGenerator(interests_field, country, time_frame):
     genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
     model = genai.GenerativeModel('models/gemini-1.5-pro-002')
 
     response = model.generate_content(
-        contents=f"Help me look through the web for the biggest news about {interest_field} {country} which happened on {time_frame}. Then, for each story, write the headline and a medium-length paragraph summary of it based on the news content in JSON format. Remove all disclaimers",
+        contents=f"Help me look through the web for the biggest news about {interests_field} {country} which happened on {time_frame}. Then, for each story, write the headline and a medium-length paragraph summary of it based on the news content in JSON format. Remove all disclaimers. MAKE UNIQUE ARTICLES, DO NOT REPEAT THE SAME NEWS.",
         tools='google_search_retrieval'
     )
     return response.text
@@ -53,6 +53,7 @@ def img_gen(title, summary):
         quality="standard",
         n=1,
     )
+    
     return response.data[0].url
 
 @app.route('/news', methods=['GET'])
@@ -90,7 +91,13 @@ def get_news():
             "region": region,
             "time_frame": time_frame
         }
+        in_depth_article = generate_in_depth_article(item["title"])
+        news_item["readTime"] = len(in_depth_article.split(" ")) / 265 * 60 + 12 #(average reading speed of 265 words per minute + 12 seconds per image)
+        
         enriched_news.append(news_item)
+        
+        news_item["content"] = in_depth_article
+        
         DATA.append(news_item) 
 
     return jsonify({'news': enriched_news})
@@ -100,16 +107,12 @@ def get_news():
 def get_news_item(id):
     for item in DATA:
         if item['id'] == id:
-            title = item['title']
-            
-            in_depth_article = generate_in_depth_article(title)
-            
             return jsonify({
                 "id": item['id'],
                 "title": item['title'],
                 "summary": item['summary'],
                 "cover": item['cover'],
-                "content": in_depth_article
+                "content": item['content']
             })
 
     return jsonify({'error': 'News item not found'}), 404
