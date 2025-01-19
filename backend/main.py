@@ -125,8 +125,8 @@ def get_news_item(id):
     for item in DATA:
         if item['id'] == id:
             
-            # if the content starts with the title, remove it
-            item["content"] = re.sub(rf"^{item['title']}", "", item["content"]).strip()
+            # if the content starts with the title, remove it, its markdown
+            item["content"] = re.sub(rf"^\# {item['title']}", "", item["content"]).strip()
             
             return jsonify({
                 "id": item['id'],
