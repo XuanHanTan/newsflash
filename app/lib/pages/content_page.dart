@@ -27,32 +27,34 @@ class ContentPage extends StatelessWidget {
 
           return ListView(
             children: [
-              SizedBox(
-                height: 300,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Image.memory(
-                        currentOpenNews.cover,
-                        height: 300,
-                        fit: BoxFit.cover,
+              currentOpenNews.cover != null
+                  ? SizedBox(
+                      height: 300,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Image.memory(
+                              currentOpenNews.cover!,
+                              height: 300,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 20,
+                            right: 20,
+                            child: IconButton.filledTonal(
+                              onPressed: () {
+                                final newsBloc = context.read<NewsBloc>();
+                                newsBloc.add(CloseNewsEvent());
+                                Navigator.pop(context);
+                              },
+                              icon: Icon(Icons.close_outlined),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Positioned(
-                      top: 20,
-                      right: 20,
-                      child: IconButton.filledTonal(
-                        onPressed: () {
-                          final newsBloc = context.read<NewsBloc>();
-                          newsBloc.add(CloseNewsEvent());
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(Icons.close_outlined),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : SizedBox(),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Column(

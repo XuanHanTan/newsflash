@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
@@ -19,6 +20,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Timer? delayTimer;
+
   @override
   void initState() {
     super.initState();
@@ -105,24 +108,29 @@ class _HomePageState extends State<HomePage> {
                                 borderRadius: BorderRadius.circular(20),
                                 child: Stack(
                                   children: [
-                                    Positioned.fill(
-                                      child: Image.memory(
-                                       news.cover,
-                                        fit: BoxFit.cover,
+                                    if (news.cover != null)
+                                      Positioned.fill(
+                                        child: Image.memory(
+                                          news.cover!,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                    ),
                                     Positioned(
                                       bottom: 0,
                                       left: 0,
                                       right: 0,
+                                      top: news.cover != null ? null : 0,
                                       child: ClipRect(
                                         child: BackdropFilter(
                                           filter: ImageFilter.blur(
                                               sigmaX: 70.0, sigmaY: 70.0),
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              color: const Color.fromARGB(255, 134, 125, 97)
-                                                  .withValues(alpha: 0.5),
+                                              color: news.cover != null
+                                                  ? const Color.fromARGB(
+                                                          255, 134, 125, 97)
+                                                      .withValues(alpha: 0.5)
+                                                  : const Color.fromARGB(255, 124, 116, 90),
                                             ),
                                             padding: EdgeInsets.all(20),
                                             child: Column(
@@ -174,12 +182,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                       );
                     },
-                    onSwipe: (previousIndex, currentIndex, direction) {
+                    /*onSwipe: (previousIndex, currentIndex, direction) {
                       final news = filteredNews[previousIndex];
                       final newsBloc = context.read<NewsBloc>();
                       newsBloc.add(SkipNewsEvent(id: news.id));
                       return true;
-                    },
+                    },*/
                   );
                 },
               ),
@@ -210,7 +218,10 @@ class _HomePageState extends State<HomePage> {
                             ));
                             await newsBloc.stream.firstWhere(
                                 (state) => state.settings.time == newTime);
-                            newsBloc.add(FetchNewsEvent());
+                            delayTimer?.cancel();
+                            delayTimer = Timer(const Duration(seconds: 1), () {
+                              newsBloc.add(FetchNewsEvent());
+                            });
                           },
                         ),
                         Text(

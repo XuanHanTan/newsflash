@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 abstract class News {
   final String id;
   final String title;
-  final Uint8List cover;
+  final Uint8List? cover;
   final int readTime;
 
   static const url = 'https://backend-v1-175242879314.us-central1.run.app/news';
@@ -33,7 +33,7 @@ class NewsSummary extends News {
       id: map['id'],
       readTime: (map['readTime'] / 60).toInt(),
       title: map['title'],
-      cover: base64Decode(map['cover']),
+      cover: map['cover'] != null ? base64Decode(map['cover']): null,
       summary: map['summary'],
     );
   }
@@ -121,7 +121,7 @@ class NewsDetailed extends News {
       id: map['id'],
       readTime: (map['readTime'] / 60).toInt(),
       title: map['title'],
-      cover: base64Decode(map['cover']),
+      cover: map['cover'] != null ? base64Decode(map['cover']): null,
       content: map['content'],
       // sources: map['sources'].map<Source>((e) => Source.fromMap(e)).toList(),
     );
