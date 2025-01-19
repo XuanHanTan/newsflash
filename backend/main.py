@@ -5,7 +5,9 @@ import os
 from openai import OpenAI
 import json
 import time
+import requests
 import uuid
+import base64
 
 load_dotenv()
 app = Flask(__name__)
@@ -20,14 +22,14 @@ def storyGenerator(interests_field, country, time_frame):
     model = genai.GenerativeModel('models/gemini-1.5-pro-002')
 
     response = model.generate_content(
-        contents=f"Help me look through the web for the biggest news about {interests_field} {country} which happened on {time_frame}. Then, for each story, write the headline and a medium-length paragraph summary of it based on the news content in JSON format. Remove all disclaimers. MAKE UNIQUE ARTICLES, DO NOT REPEAT THE SAME NEWS.",
+        contents=f"Help me look through the web for the biggest news about {interests_field} {country} which happened on {time_frame}. Then, for each story, write the headline and a medium-length paragraph summary of it based on the news content in JSON format. Add in a 'prompt' parameter, which will be used to create the cover image for stable diffusion 3 model. Make the prompt innovative, realistic and enagaing so that users read our article. Remove all disclaimers. MAKE UNIQUE ARTICLES, DO NOT REPEAT THE SAME NEWS.",
         tools='google_search_retrieval'
     )
     return response.text
 
 def clean_news_data(raw_data):
     cleaned_data = raw_data.replace('```json\n', '').replace('```', '').strip()
-
+    
     try:
         parsed_data = json.loads(cleaned_data)
     except json.JSONDecodeError as e:
@@ -38,24 +40,34 @@ def clean_news_data(raw_data):
     for item in parsed_data:
         cleaned_item = {
             "title": item.get("headline", "").strip(),
-            "summary": item.get("summary", "").strip()
+            "summary": item.get("summary", "").strip(),
+            "prompt": item.get("prompt", "").strip(),
         }
         cleaned_parsed_data.append(cleaned_item)
-    return cleaned_parsed_data[:5] 
+        
+    return cleaned_parsed_data[:9] 
 
-def img_gen(title, summary):
-    api_key = os.getenv('OPENAI_API_KEY')
-    client = OpenAI(api_key=api_key)
-    prompt = f"Create an image inspired by a news story about {title}. The story should convey this: {summary} without any text or words involved."
-    response = client.images.generate(
-        prompt=prompt,
-        size="1024x1024",
-        quality="standard",
-        n=1,
-    )
+def img_gen(prompt):
     
-    return response.data[0].url
-
+    response = requests.post(
+        f"https://api.stability.ai/v2beta/stable-image/generate/sd3",
+        headers={
+            "authorization": f"Bearer {os.environ['STABILITY_API_KEY']}",
+            "accept": "image/*"
+        },
+        files={"none": ''},
+        data={
+            "prompt": prompt,
+            "output_format": "jpeg",
+        },
+    )
+        
+    if response.status_code == 200:
+        return base64.b64encode(response.content).decode('utf-8')
+    else:
+        return None
+        
+    
 @app.route('/news', methods=['GET'])
 def get_news():
     interests = request.args.get('interests', '')
@@ -81,7 +93,8 @@ def get_news():
 
     enriched_news = []
     for item in cleaned_news:
-        image_url = img_gen(item["title"], item["summary"])
+        image_url = img_gen(item["prompt"])
+        
         news_item = {
             "id": generate_uuid(),
             "title": item["title"],
@@ -91,14 +104,17 @@ def get_news():
             "region": region,
             "time_frame": time_frame
         }
+        
         in_depth_article = generate_in_depth_article(item["title"])
-        news_item["readTime"] = len(in_depth_article.split(" ")) / 265 * 60 + 12 #(average reading speed of 265 words per minute + 12 seconds per image)
+        news_item["readTime"] = len(in_depth_article.split(" ")) / 265 * 60 + 12 
         
         enriched_news.append(news_item)
         
         news_item["content"] = in_depth_article
         
         DATA.append(news_item) 
+        with open('data.json', 'w') as f:
+            json.dump(DATA, f)
 
     return jsonify({'news': enriched_news})
 
@@ -123,10 +139,10 @@ def generate_in_depth_article(title):
     model = genai.GenerativeModel('models/gemini-1.5-pro-002')
     
     response = model.generate_content(
-        contents=f"Write an in-depth, engaging, and informative article on the topic: '{title}'. The article should explore various aspects of the topic, provide a good overview, and showcase different perspectives. Use all online sources available for insights. Make it captivating and interesting for the reader. USE MARKDOWN FORMAT.",
+        contents=f"Write an in-depth, engaging, and informative article on the topic: '{title}'. The article should explore various aspects of the topic, provide a good overview, and showcase different perspectives. Use all online sources available for insights. Make it captivating and interesting for the reader. USE MARKDOWN FORMAT. AT LEAST 500 WORDS.",
         tools='google_search_retrieval'
     )
-
+    
     return response.text
 
 if __name__ == '__main__':
