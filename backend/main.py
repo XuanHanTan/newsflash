@@ -7,6 +7,7 @@ import json
 import time
 import requests
 import uuid
+import re
 import base64
 
 load_dotenv()
@@ -22,7 +23,7 @@ def storyGenerator(interests_field, country, time_frame):
     model = genai.GenerativeModel('models/gemini-1.5-pro-002')
 
     response = model.generate_content(
-        contents=f"Help me look through the web for the biggest news about {interests_field} {country} which happened on {time_frame}. Then, for each story, write the headline and a medium-length paragraph summary of it based on the news content in JSON format. Add in a 'prompt' parameter, which will be used to create the cover image for stable diffusion 3 model. Make the prompt innovative, realistic and enagaing so that users read our article. Remove all disclaimers. MAKE UNIQUE ARTICLES, DO NOT REPEAT THE SAME NEWS.",
+        contents=f"Help me look through the web for the biggest news about {interests_field} {country} which happened on {time_frame}. Then, for each story, write the headline and a very short summary(1-2 line) of it based on the news content in JSON format. Add in a 'prompt' parameter, which will be used to create the cover image for stable diffusion 3 model. Make the prompt innovative, realistic and enagaing so that users read our article. Remove all disclaimers. MAKE UNIQUE ARTICLES, DO NOT REPEAT THE SAME NEWS.",
         tools='google_search_retrieval'
     )
     return response.text
@@ -123,12 +124,17 @@ def get_news():
 def get_news_item(id):
     for item in DATA:
         if item['id'] == id:
+            
+            # if the content starts with the title, remove it
+            item["content"] = re.sub(rf"^{item['title']}", "", item["content"]).strip()
+            
             return jsonify({
                 "id": item['id'],
                 "title": item['title'],
                 "summary": item['summary'],
                 "cover": item['cover'],
-                "content": item['content']
+                "content": item['content'],
+                "readTime": item['readTime']
             })
 
     return jsonify({'error': 'News item not found'}), 404
@@ -139,7 +145,7 @@ def generate_in_depth_article(title):
     model = genai.GenerativeModel('models/gemini-1.5-pro-002')
     
     response = model.generate_content(
-        contents=f"Write an in-depth, engaging, and informative article on the topic: '{title}'. The article should explore various aspects of the topic, provide a good overview, and showcase different perspectives. Use all online sources available for insights. Make it captivating and interesting for the reader. USE MARKDOWN FORMAT. AT LEAST 500 WORDS.",
+        contents=f"Write an in-depth, engaging, and informative article on the topic: '{title}'. The article should explore various aspects of the topic, provide a good overview, and showcase different perspectives. Use all online sources available for insights. Make it captivating and interesting for the reader. DONT ADD THE TITLE!, I already have it. USE MARKDOWN FORMAT. AT LEAST 500 WORDS.",
         tools='google_search_retrieval'
     )
     
