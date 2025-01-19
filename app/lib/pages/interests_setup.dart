@@ -85,10 +85,12 @@ class InterestsSetup extends StatelessWidget {
                       onPressed: state.interests.isEmpty
                           ? null
                           : () {
-                              Navigator.pushReplacement(
+                              Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => HomePage()),
+                                  builder: (context) => HomePage(),
+                                ),
+                                (route) => false,
                               );
                             },
                       child: Text("Next"),

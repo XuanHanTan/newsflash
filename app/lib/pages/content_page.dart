@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:app/bloc/news_bloc.dart';
 import 'package:app/bloc/news_event.dart';
 import 'package:app/bloc/news_state.dart';
@@ -13,7 +11,6 @@ class ContentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mediaQueryData = MediaQuery.of(context);
 
     return Scaffold(
       body: BlocBuilder<NewsBloc, NewsState>(
@@ -36,7 +33,7 @@ class ContentPage extends StatelessWidget {
                   children: [
                     Positioned.fill(
                       child: Image.memory(
-                        base64Decode(currentOpenNews.cover),
+                        currentOpenNews.cover,
                         height: 300,
                         fit: BoxFit.cover,
                       ),

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
@@ -108,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                                   children: [
                                     Positioned.fill(
                                       child: Image.memory(
-                                        base64Decode(news.cover),
+                                       news.cover,
                                         fit: BoxFit.cover,
                                       ),
                                     ),

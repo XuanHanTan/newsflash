@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 abstract class News {
   final String id;
   final String title;
-  final String cover;
+  final Uint8List cover;
   final int readTime;
 
   static const url = 'https://backend-v1-175242879314.us-central1.run.app/news';
@@ -32,7 +33,7 @@ class NewsSummary extends News {
       id: map['id'],
       readTime: (map['readTime'] / 60).toInt(),
       title: map['title'],
-      cover: map['cover'],
+      cover: base64Decode(map['cover']),
       summary: map['summary'],
     );
   }
@@ -120,7 +121,7 @@ class NewsDetailed extends News {
       id: map['id'],
       readTime: (map['readTime'] / 60).toInt(),
       title: map['title'],
-      cover: map['cover'],
+      cover: base64Decode(map['cover']),
       content: map['content'],
       // sources: map['sources'].map<Source>((e) => Source.fromMap(e)).toList(),
     );
